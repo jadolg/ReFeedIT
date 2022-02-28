@@ -1,0 +1,94 @@
+version: "3"
+services:
+  refeedit:
+    image: guamulo/refeedit
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8001:8001"
+    build:
+      context: .
+
+  refeedit_apply_migrations:
+    image: guamulo/refeedit
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      - db
+      - refeedit
+    command:
+      - python
+      - manage.py
+      - migrate
+
+  refeedit_collectstatics:
+    image: guamulo/refeedit
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      - db
+      - refeedit
+    command:
+      - python
+      - manage.py
+      - collectstatic
+      - --noinput
+
+  refeedit_create_superuser:
+    image: guamulo/refeedit
+    env_file:
+      - .env
+    restart: on-failure
+    depends_on:
+      - db
+      - refeedit_apply_migrations
+    command:
+      - python
+      - manage.py
+      - initadmin
+
+  db:
+    image: postgres:14-alpine
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - refeedit_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=refeedit
+      - POSTGRES_DB=refeedit
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+  celery:
+    image: guamulo/refeedit
+    restart: always
+    command: celery -A refeedit worker -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  celery-beat:
+    image: guamulo/refeedit
+    restart: always
+    command: celery -A refeedit beat -l info
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - refeedit_apply_migrations
+
+volumes:
+  refeedit_data:
