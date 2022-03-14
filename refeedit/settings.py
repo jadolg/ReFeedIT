@@ -26,8 +26,12 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", False)
+SITE_DOMAIN = os.getenv("SITE_DOMAIN", "refeedit.akiel.dev")
 
-ALLOWED_HOSTS = ['*', ]
+if DEBUG:
+    ALLOWED_HOSTS = ['*', ]
+else:
+    ALLOWED_HOSTS = [SITE_DOMAIN, ]
 
 # Application definition
 
