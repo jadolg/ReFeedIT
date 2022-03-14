@@ -12,7 +12,7 @@ def parse_feed(feed: Feed):
                                     entry.get("description", "???"),
                                     entry.get("link", "???"))
         if not Entry.objects.filter(hash=entry_hash):
-            logging.info(f"saving entry {entry}")
+            logging.debug(f"saving entry {entry}")
             new_entry = Entry(
                 feed=feed,
                 title=entry.get("title", "???"),
@@ -22,4 +22,4 @@ def parse_feed(feed: Feed):
             )
             new_entry.save()
         else:
-            logging.info(f"entry {entry} already persisted")
+            logging.debug(f"entry {entry} already persisted")
