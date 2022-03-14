@@ -33,6 +33,8 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = [SITE_DOMAIN, ]
 
+CSRF_TRUSTED_ORIGINS = [f'https://{SITE_DOMAIN}', ]
+
 # Application definition
 
 INSTALLED_APPS = [
